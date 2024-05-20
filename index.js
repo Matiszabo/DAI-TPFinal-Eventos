@@ -1,29 +1,20 @@
-import config from './src/configs/db-configs.js'
-import pkg from 'pg' 
-import cors from 'cors'
-import express from 'express';
+import express from "express";
+import cors from "cors";
+import ProvinceRouter from "./src/controllers/province-controller.js"
 
-const { Client }  = pkg;
-const app = express();
-const port = 3000;
-
-const client = new Client(config); 
-await client.connect();
+const app = express(); 
+const port=3001; 
 
 app.use(cors());
 app.use(express.json());
-//app.use('/front', express.static('public'));
+//endpoints 
+//app.use('/front', express.static('public));
 //app.use('/api/event', EventRouter);
-app.use('/api/provinces', ProvinceRouter);
-app.use('/api/event-category', CategoriesRouter);
+app.use('/api/provinces', ProvinceRouter)
+//app.use('/api/category', CategoryRouter)
 //app.use('/api/user', UserRouter);
 //app.use(unknownEndpoint);
-app.listen(port, () => {
-console.log(`"server" Listening on port ${port}`);
+
+app.listen(port,()=>{ 
+    console.log(`Exampleapplisteningonport${port}`) 
 })
-
-//app.use('/api/user', UserRouter);
-//app.use(unknownEndpoint);
-
-
-
