@@ -1,4 +1,4 @@
-import ProvinceRepository from "../repositories/provinces-repository.js";
+import ProvinceRepository from "../repositories/province-repository.js";
 
 export default class ProvinceService{
 
