@@ -4,7 +4,7 @@ import UsersService from '../services/event_users-service.js';
 const router = Router();
 const svc = new UsersService();
 
-const claveSecreta = "MaiuJuli_0607"
+const claveSecreta = "clavesecreta"
 
 
 router.post('/login', async (req, res) => {
