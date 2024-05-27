@@ -1,11 +1,11 @@
 import {Router} from 'express';
+import { parse } from 'dotenv';
 import jwt from 'jsonwebtoken';
 import UsersService from '../services/event_users-service.js';
 const router = Router();
 const svc = new UsersService();
 
-const claveSecreta = "clavesecreta"
-
+const claveSecreta = "Messi_1987"
 
 router.post('/login', async (req, res) => {
     let respuesta;
@@ -46,7 +46,7 @@ router.post('/register', async (req, res) => {
         return res.status(400).send('El email (username) no es válido.');
     }
     if (password.length < 3) {
-        return res.status(400).send('El campo password debe tener al menos 3 caracteres.');
+        return res.status(400).send('Password debe tener al menos 3 caracteres.');
     }
     try {
         const newUser = await svc.createAsync({ first_name, last_name, username, password });

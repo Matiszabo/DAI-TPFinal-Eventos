@@ -20,7 +20,7 @@ export default class EventRepository {
     }
 
     getByIdAsync = async (id) => {
-        let returnCat = null;
+        let returnLoc = null;
         const client = new Client(DBConfig);
         await client.connect();
         try {
@@ -28,11 +28,29 @@ export default class EventRepository {
             const values = [id];
             const result = await client.query(sql, values);
             await client.end();
-            returnCat = result.rows;
+            returnLoc = result.rows;
         } catch (error) {
             console.log(error);
-            returnCat = null;
+            returnLoc = null;
         }
-        return returnCat;
+        return returnLoc;
     }
+
+    getByIdLocationAsync = async (limit, offset, id) => {
+        let returnLoc = null;
+        const client = new Client(DBConfig);
+        await client.connect();
+        try {
+            const sql = `SELECT * FROM public.event_locations WHERE id_location = $3 LIMIT $1 OFFSET $2`;
+            const values = [limit, offset, id];
+            const result = await client.query(sql, values);
+            await client.end();
+            returnLoc = result.rows;
+        } catch (error) {
+            console.log(error);
+            returnLoc = null;
+        }
+        return returnLoc;
+    }
+
 }
