@@ -1,6 +1,6 @@
-class event_categories { 
+class Event_categories{
     id;
-    name;       
-    display_order; 
-    } 
-    export default event_categories;
+    name;
+    display_order;
+}
+export default Event_categories;
