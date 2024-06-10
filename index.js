@@ -1,20 +1,27 @@
-import express from "express";
-import cors from "cors";
-import ProvinceRouter from "./src/controllers/province-controller.js"
+import express from 'express';
+import cors from 'cors';
+import ProvinceRouter from './src/controllers/province-controller.js';
+import CategoryRouter from './src/controllers/category-controller.js';
+import LocationRouter from './src/controllers/location-controller.js';
+import EnrollmentRouter from './src/controllers/enrollment-controller.js';
+import UserRouter from './src/controllers/user-controller.js';
+import EventRouter from './src/controllers/event-controller.js';
+import EventLocationRouter from './src/controllers/event-location-controller.js'; 
 
-const app = express(); 
-const port=3001; 
+const app = express();
+const port = 3000;
 
 app.use(cors());
 app.use(express.json());
-//endpoints 
-//app.use('/front', express.static('public));
-//app.use('/api/event', EventRouter);
-app.use('/api/provinces', ProvinceRouter)
-//app.use('/api/category', CategoryRouter)
-//app.use('/api/user', UserRouter);
-//app.use(unknownEndpoint);
 
-app.listen(port,()=>{ 
-    console.log(`Exampleapplisteningonport${port}`) 
-})
+app.use('/api/province', ProvinceRouter);
+app.use('/api/event-category', CategoryRouter);
+app.use('/api/location', LocationRouter);
+app.use('/api/enrollment', EnrollmentRouter);
+app.use('/api/user', UserRouter);
+app.use('/api/event', EventRouter);
+app.use('/api/event-location', EventLocationRouter); 
+
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+});

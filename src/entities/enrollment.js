@@ -1,4 +1,4 @@
-class Event_enrollments{
+class enrollment{
     id;
     id_event;
     id_user;
@@ -8,4 +8,4 @@ class Event_enrollments{
     observations;
     rating;
 }
-export default Event_enrollments;
+export default enrollment;

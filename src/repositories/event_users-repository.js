@@ -1,6 +1,6 @@
-import DBConfig from '../configs/db-config.js';
+import DBConfig from '../configs/db-configs.js';
 import pkg from 'pg'
-const { Client, Pool }  = pkg;
+const { Client, config }  = pkg;
 
 export default class UsersRepository {
     getByUsernameAsync = async (entity) => {
