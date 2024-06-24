@@ -1,8 +1,8 @@
-import config from '../configs/db-configs.js';
+import pool from '../configs/db-config.js';
 
 export const getUserByUsername = async (username, password) => {
     let respuesta = null;
-    const client = await config.connect();
+    const client = await pool.connect();
     try {
         const res = await client.query('SELECT * FROM users WHERE username = $1 AND password = $2', [username, password]);
         if (res.rows.length > 0 ){
@@ -15,13 +15,13 @@ export const getUserByUsername = async (username, password) => {
 };
 
 export const createUser = async (userData) => {
-    const client = await config.connect();
+    const client = await pool.connect();
     try {
         const res = await client.query(
             'INSERT INTO users (first_name, last_name, username, password) VALUES ($1, $2, $3, $4) RETURNING *',
             [userData.first_name, userData.last_name, userData.username, userData.password]
         );
-        console.log('Nuevo User:', res.rows[0]);
+        console.log('New User:', res.rows[0]);
         return res.rows[0];
     } finally {
         client.release();

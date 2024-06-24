@@ -20,7 +20,7 @@ router.get("/:id", async (req, res) => {
         if (location) {
             res.status(200).json(location);
         } else {
-            res.status(404).json({ message: "Location no encontrada" });
+            res.status(404).json({ message: "Location not found" });
         }
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -34,7 +34,7 @@ router.get("/:id/event-location", async (req, res) => {
         if (eventLocations) {
             res.status(200).json(eventLocations);
         } else {
-            res.status(404).json({ message: "Location no encontrada" });
+            res.status(404).json({ message: "Location not found" });
         }
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -6,31 +6,31 @@ const enrollmentService = new EnrollmentService();
 
 router.post("/:id/enrollment", async (req, res) => {
     const eventId = req.params.id;
-    const userId = req.body.userId;
+    const userId = req.body.userId; 
     try {
         const result = await enrollmentService.enrollUserToEvent(eventId, userId);
         if (result.success) {
-            res.status(201).json({ message: "Usuario inscrito al evento con éxito" });
+            res.status(201).json({ message: "User enrolled to event successfully" });
         } else {
             res.status(400).json({ message: result.error });
         }
     } catch (error) {
-        res.status(404).json({ message: "Evento no encontrado" });
+        res.status(404).json({ message: "Event not found" });
     }
 });
 
 router.delete("/:id/enrollment", async (req, res) => {
     const eventId = req.params.id;
-    const userId = req.body.userId;
+    const userId = req.body.userId; 
     try {
         const result = await enrollmentService.removeUserFromEvent(eventId, userId);
         if (result.success) {
-            res.status(200).json({ message: "Usuario borrado del evento con éxito" });
+            res.status(200).json({ message: "User removed from event successfully" });
         } else {
             res.status(400).json({ message: result.error });
         }
     } catch (error) {
-        res.status(404).json({ message: "Evento no encontrado" });
+        res.status(404).json({ message: "Event not found" });
     }
 });
 

@@ -1,5 +1,5 @@
 {
-  "name": "tpfinal",
+  "name": "TpFinal",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -16,6 +16,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.0",
     "pg": "^8.11.5",
+    "run": "^1.5.0",
     "start": "^5.1.0"
   }
 }

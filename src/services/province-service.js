@@ -1,33 +1,29 @@
 import ProvinceRepository from "../repositories/province-repository.js";
 
-export default class ProvinceService{
-
-    getAllAsync = async () => {
-        const repo = new ProvinceRepository();
-        const returnArray = await  repo.getAllAsync();
-        return returnArray;
+class ProvinceService {
+    constructor() {
+        this.provinceRepository = new ProvinceRepository();
     }
 
-    getById = async (id) => {
-        const repo = new ProvinceRepository();
-        const returnArray = await repo.getById(id);
-        return returnArray;
+    async getAllProvinces() {
+        return await this.provinceRepository.getAll();
     }
 
-    insertProvince = async (entity) => {
-        const repo = new ProvinceRepository();
-        await repo.insertProvince(entity);
+    async getProvinceById(id) {
+        return await this.provinceRepository.getById(id);
     }
 
-    updateProvince = async (entity) => {
-        const repo = new ProvinceRepository();
-        const returnArray = await repo.updateProvince(entity);
-        return returnArray;
+    async createProvince(province) {
+        return await this.provinceRepository.create(province);
     }
 
-    deleteProvince = async (provAEliminar) => {
-        const repo = new ProvinceRepository();
-        await repo.deleteProvince(provAEliminar);
+    async updateProvince(province) {
+        return await this.provinceRepository.update(province);
     }
-    
+
+    async deleteProvince(id) {
+        return await this.provinceRepository.delete(id);
+    }
 }
+
+export default ProvinceService;

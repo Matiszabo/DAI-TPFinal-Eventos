@@ -5,8 +5,8 @@ import {
     createEventLocation,
     updateEventLocation,
     deleteEventLocation
-} from '../services/location-service.js';
-// import { authenticateToken } from '../middlewares/auth-middleware.js';
+} from '../services/event-location-service.js';
+import { authenticateToken } from '../middlewares/auth-middleware.js';
 
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
     try {
         const eventLocation = await getEventLocationById(id, userId);
         if (!eventLocation) {
-            return res.status(404).json({ message: 'Event location no encontrada o no tiene autorización.' });
+            return res.status(404).json({ message: 'Event location not found or not authorized.' });
         }
         res.status(200).json(eventLocation);
     } catch (error) {
@@ -51,10 +51,10 @@ router.post('/', authenticateToken, async (req, res) => {
     const { name, full_address, id_location, max_capacity } = req.body;
 
     if (!name || name.length < 3 || !full_address || full_address.length < 3) {
-        return res.status(400).json({ message: 'El nombre o la dirección completa no son válidos.' });
+        return res.status(400).json({ message: 'Name or full address is invalid.' });
     }
     if (max_capacity <= 0) {
-        return res.status(400).json({ message: 'La capacidad máxima debe ser mayor que cero.' });
+        return res.status(400).json({ message: 'Max capacity must be greater than zero.' });
     }
 
     try {
@@ -70,16 +70,16 @@ router.put('/', authenticateToken, async (req, res) => {
     const { id, name, full_address, id_location, max_capacity } = req.body;
 
     if (!name || name.length < 3 || !full_address || full_address.length < 3) {
-        return res.status(400).json({ message: 'El nombre o la dirección completa no son válidos.' });
+        return res.status(400).json({ message: 'Name or full address is invalid.' });
     }
     if (max_capacity <= 0) {
-        return res.status(400).json({ message: 'La capacidad máxima debe ser mayor que cero.' });
+        return res.status(400).json({ message: 'Max capacity must be greater than zero.' });
     }
 
     try {
         const updatedEventLocation = await updateEventLocation({ id, name, full_address, id_location, max_capacity, id_creator_user: userId });
         if (!updatedEventLocation) {
-            return res.status(404).json({ message: 'Event location no encontrada o no tiene autorización.' });
+            return res.status(404).json({ message: 'Event location not found or not authorized.' });
         }
         res.status(200).json(updatedEventLocation);
     } catch (error) {
@@ -94,7 +94,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     try {
         const deletedEventLocation = await deleteEventLocation(id, userId);
         if (!deletedEventLocation) {
-            return res.status(404).json({ message: 'Event location no encontrada o no tiene autorización.' });
+            return res.status(404).json({ message: 'Event location not found or not authorized.' });
         }
         res.status(200).json(deletedEventLocation);
     } catch (error) {

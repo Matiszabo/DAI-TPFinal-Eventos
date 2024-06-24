@@ -20,7 +20,7 @@ router.get("/:id", async (req, res) => {
         if (category) {
             res.status(200).json(category);
         } else {
-            res.status(404).json({ message: "Category no encontrada" });
+            res.status(404).json({ message: "Category not found" });
         }
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -43,9 +43,9 @@ router.put("/", async (req, res) => {
         const result = await categoryService.updateCategory(updatedCategory);
         console.log(result);
         if (result === 1) {
-            res.status(201).json({ message: "Category actualizada" });
+            res.status(201).json({ message: "Category updated successfully" });
         } else {
-            res.status(404).json({ message: "Category no encontrada" });
+            res.status(404).json({ message: "Category not found" });
         }
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -57,9 +57,9 @@ router.delete("/:id", async (req, res) => {
     try {
         const result = await categoryService.deleteCategory(id);
         if (result.deletedCount === 1) {
-            res.status(200).json({ message: "Category eliminada" });
+            res.status(200).json({ message: "Category deleted successfully" });
         } else {
-            res.status(404).json({ message: "Category no encontrada" });
+            res.status(404).json({ message: "Category not found" });
         }
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -1,8 +1,8 @@
-import config from "../configs/db-configs.js";
+import pool from "../configs/db-config.js";
 
 class LocationRepository {
     async getAll() {
-        const client = await config.connect();
+        const client = await pool.connect();
         try {
             const result = await client.query('SELECT * FROM locations');
             return result.rows;
@@ -12,7 +12,7 @@ class LocationRepository {
     }
 
     async getById(id) {
-        const client = await config.connect();
+        const client = await pool.connect();
         try {
             const result = await client.query('SELECT * FROM locations WHERE id = $1', [id]);
             return result.rows[0];
@@ -22,7 +22,7 @@ class LocationRepository {
     }
 
     async getEventLocationsByLocationId(id) {
-        const client = await config.connect();
+        const client = await pool.connect();
         try {
             const result = await client.query('SELECT * FROM event_locations WHERE location_id = $1', [id]);
             return result.rows;

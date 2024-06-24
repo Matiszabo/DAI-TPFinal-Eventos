@@ -1,9 +1,9 @@
-import config from "../configs/db-configs.js";
+import pool from "../configs/db-config.js";
 
 
 export const createEvent = async (eventData) => {
     const { name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location, userId } = eventData;
-    const client = await config.connect();
+    const client = await pool.connect();
     try {
         const res = await client.query(
             'INSERT INTO events (name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
@@ -17,7 +17,7 @@ export const createEvent = async (eventData) => {
 
 export const updateEvent = async (eventData) => {
     const { id, name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location } = eventData;
-    const client = await config.connect();
+    const client = await pool.connect();
     try {
         const res = await client.query(
             'UPDATE events SET name = $1, description = $2, max_assistance = $3, max_capacity = $4, price = $5, duration_in_minutes = $6, id_event_location = $7 WHERE id = $8 RETURNING *',
@@ -30,7 +30,7 @@ export const updateEvent = async (eventData) => {
 };
 
 export const deleteEvent = async (eventId) => {
-    const client = await config.connect();
+    const client = await pool.connect();
     try {
         await client.query('DELETE FROM events WHERE id = $1', [eventId]);
     } finally {
@@ -39,7 +39,7 @@ export const deleteEvent = async (eventId) => {
 };
 
 export const getEventById = async (eventId) => {
-    const client = await config.connect();
+    const client = await pool.connect();
     try {
         const res = await client.query('SELECT * FROM events WHERE id = $1', [eventId]);
         return res.rows[0];
@@ -50,7 +50,7 @@ export const getEventById = async (eventId) => {
 
 
 export const getEventDetailsById = async (eventId) => {
-    const client = await config.connect();
+    const client = await pool.connect();
     try {
         const res = await client.query(`
             SELECT 
@@ -78,53 +78,8 @@ export const getEventDetailsById = async (eventId) => {
     }
 };
 
-export const getEventEnrollments = async (eventId, filters) => {
-    const client = await config.connect();
-    const { first_name, last_name, username, attended, rating } = filters;
-    const conditions = [];
-    const values = [eventId];
-
-    if (first_name) {
-        values.push(`%${first_name}%`);
-        conditions.push(`u.first_name ILIKE $${values.length}`);
-    }
-    if (last_name) {
-        values.push(`%${last_name}%`);
-        conditions.push(`u.last_name ILIKE $${values.length}`);
-    }
-    if (username) {
-        values.push(`%${username}%`);
-        conditions.push(`u.username ILIKE $${values.length}`);
-    }
-    if (attended !== undefined) {
-        values.push(attended);
-        conditions.push(`e.attended = $${values.length}`);
-    }
-    if (rating) {
-        values.push(rating);
-        conditions.push(`e.rating >= $${values.length}`);
-    }
-
-    const whereClause = conditions.length ? `AND ${conditions.join(' AND ')}` : '';
-
-    try {
-        const res = await client.query(`
-            SELECT 
-                e.id, e.id_event, e.id_user, e.description, e.registration_date_time, e.attended, e.observations, e.rating,
-                u.id as user_id, u.first_name, u.last_name, u.username
-            FROM event_enrollments e
-            JOIN users u ON e.id_user = u.id
-            WHERE e.id_event = $1 ${whereClause}
-        `, values);
-        return res.rows;
-    } finally {
-        client.release();
-    }
-};
-
-
 export const getEvents = async (limit, offset) => {
-    const client = await config.connect();
+    const client = await pool.connect();
     try {
         const res = await client.query(`
             SELECT 
@@ -153,7 +108,7 @@ export const getEvents = async (limit, offset) => {
 };
 
 export const searchEvents = async (filters) => {
-    const client = await config.connect();
+    const client = await pool.connect();
     const { name, category, startdate, tag, limit, offset } = filters;
     const conditions = [];
     const values = [];
@@ -212,6 +167,137 @@ export const searchEvents = async (filters) => {
             events: res.rows,
             total
         };
+    } finally {
+        client.release();
+    }
+};
+
+
+export const enrollInEventRepo = async (eventId, userId) => {
+    const client = await pool.connect();
+    try {
+        const eventRes = await client.query('SELECT * FROM events WHERE id = $1', [eventId]);
+        const event = eventRes.rows[0];
+        
+        if (!event) {
+            throw { status: 404, message: 'Evento no encontrado.' };
+        }
+        if (!event.enabled_for_enrollment) {
+            throw { status: 400, message: 'Evento no está habilitado para la inscripción.' };
+        }
+        if (event.start_date <= new Date()) {
+            throw { status: 400, message: 'El evento ya ha sucedido o es hoy.' };
+        }
+        
+        const userEnrollmentRes = await client.query('SELECT * FROM event_enrollments WHERE id_event = $1 AND id_user = $2', [eventId, userId]);
+        if (userEnrollmentRes.rows.length > 0) {
+            throw { status: 400, message: 'El usuario ya está registrado en el evento.' };
+        }
+        
+        const enrollmentsRes = await client.query('SELECT COUNT(*) FROM event_enrollments WHERE id_event = $1', [eventId]);
+        const enrolledCount = parseInt(enrollmentsRes.rows[0].count, 10);
+        if (enrolledCount >= event.max_assistance) {
+            throw { status: 400, message: 'Excedido el límite de asistencia.' };
+        }
+
+        const registrationDateTime = new Date();
+        const res = await client.query(
+            'INSERT INTO event_enrollments (id_event, id_user, registration_date_time) VALUES ($1, $2, $3) RETURNING *',
+            [eventId, userId, registrationDateTime]
+        );
+        return res.rows[0];
+    } finally {
+        client.release();
+    }
+};
+
+export const removeEnrollmentRepo = async (eventId, userId) => {
+    const client = await pool.connect();
+    try {
+        const eventRes = await client.query('SELECT * FROM events WHERE id = $1', [eventId]);
+        const event = eventRes.rows[0];
+
+        if (!event) {
+            throw { status: 404, message: 'Evento no encontrado.' };
+        }
+        if (event.start_date <= new Date()) {
+            throw { status: 400, message: 'El evento ya ha sucedido o es hoy.' };
+        }
+
+        const userEnrollmentRes = await client.query('SELECT * FROM event_enrollments WHERE id_event = $1 AND id_user = $2', [eventId, userId]);
+        if (userEnrollmentRes.rows.length === 0) {
+            throw { status: 400, message: 'El usuario no está registrado en el evento.' };
+        }
+
+        await client.query('DELETE FROM event_enrollments WHERE id_event = $1 AND id_user = $2', [eventId, userId]);
+    } finally {
+        client.release();
+    }
+};
+
+export const getEventEnrollments = async (eventId, filters) => {
+    const client = await pool.connect();
+    const { first_name, last_name, username, attended, rating } = filters || {}; 
+    const conditions = [];
+    const values = [eventId];
+
+    if (first_name) {
+        values.push(`%${first_name}%`);
+        conditions.push(`u.first_name ILIKE $${values.length}`);
+    }
+    if (last_name) {
+        values.push(`%${last_name}%`);
+        conditions.push(`u.last_name ILIKE $${values.length}`);
+    }
+    if (username) {
+        values.push(`%${username}%`);
+        conditions.push(`u.username ILIKE $${values.length}`);
+    }
+    if (attended !== undefined) {
+        values.push(attended);
+        conditions.push(`e.attended = $${values.length}`);
+    }
+    if (rating) {
+        values.push(rating);
+        conditions.push(`e.rating >= $${values.length}`);
+    }
+
+    const whereClause = conditions.length ? `AND ${conditions.join(' AND ')}` : '';
+
+    try {
+        const res = await client.query(`
+            SELECT 
+                e.id, e.id_event, e.id_user, e.description, e.registration_date_time, e.attended, e.observations, e.rating,
+                u.id as user_id, u.first_name, u.last_name, u.username
+            FROM event_enrollments e
+            JOIN users u ON e.id_user = u.id
+            WHERE e.id_event = $1 ${whereClause}
+        `, values);
+        return res.rows;
+    } finally {
+        client.release();
+    }
+};
+
+
+export const rateEventRepo = async (eventId, enrollmentId, rating, observations) => {
+    const client = await pool.connect();
+    try {
+        const enrollmentRes = await client.query('SELECT * FROM event_enrollments WHERE id = $1 AND id_event = $2', [enrollmentId, eventId]);
+        if (enrollmentRes.rows.length === 0) {
+            throw { status: 400, message: 'El usuario no está registrado al evento.' };
+        }
+
+        const eventRes = await client.query('SELECT * FROM events WHERE id = $1 AND start_date <= NOW()', [eventId]);
+        if (eventRes.rows.length === 0) {
+            throw { status: 400, message: 'El evento no ha finalizado aún.' };
+        }
+
+        if (rating < 1 || rating > 10) {
+            throw { status: 400, message: 'El rating debe estar entre 1 y 10 (inclusive).' };
+        }
+
+        await client.query('UPDATE event_enrollments SET rating = $1, observations = $2 WHERE id = $3', [rating, observations, enrollmentId]);
     } finally {
         client.release();
     }

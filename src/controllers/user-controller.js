@@ -1,6 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { getUserByUsername, createUser } from '../services/users-service.js';
+import { getUserByUsername, createUser } from '../services/user-service.js';
 
 const router = express.Router();
 
@@ -11,10 +11,10 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await getUserByUsername(username, password);
-        console.log('Usuario recuperado de la BD: ', user);
+        console.log('User retrieved from DB:', user);
 
         if (user == null) {
-            console.log('Usuario no encontrado');
+            console.log('User not found');
             return res.status(401).json({
                 success: false,
                 message: 'Usuario o clave inválida.',
@@ -24,7 +24,7 @@ router.post('/login', async (req, res) => {
         
         console.log('OK',user);
         const token = jwt.sign(user, 'your_jwt_secret', { expiresIn: '1h' });
-        console.log('Token generado:', token);
+        console.log('Generated token:', token);
 
         res.status(200).json({
             success: true,
@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
             token: token
         });
     } catch (error) {
-        console.error('Error en login:', error);
+        console.error('Error during login:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -50,15 +50,15 @@ router.post('/register', async (req, res) => {
     }
 
     if (password.length < 3) {
-        return res.status(400).json({ message: 'El campo password no cumple con el mínimo de letras.' });
+        return res.status(400).json({ message: 'El campo password tiene menos de 3 letras.' });
     }
 
     try {
         const newUser = await createUser({ first_name, last_name, username, password});
-        console.log('Nuevo usuario creado:', newUser);
+        console.log('New user created:', newUser);
         res.status(201).json({ message: 'Usuario registrado exitosamente.' });
     } catch (error) {
-        console.error('Error en el registro:', error);
+        console.error('Error during registration:', error);
         res.status(500).json({ message: error.message });
     }
 });
