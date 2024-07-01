@@ -84,8 +84,6 @@ router.delete('/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ message: 'Evento no encontrado o no pertenece al usuario.' });
         }
 
-        // Validar que no haya usuarios registrados al evento
-        // Este es un ejemplo y debe ser implementado
         const hasUsersRegistered = false; // Implementar esta lógica
         if (hasUsersRegistered) {
             return res.status(400).json({ message: 'Hay usuarios registrados en el evento.' });
@@ -144,7 +142,7 @@ router.post('/:id/enrollment', authenticateToken, async (req, res) => {
     let respuesta;
     const eventId = req.params.id;
     const userId = req.user.id;
-    console.log("aasd")
+    console.log("-")
     try {
         const enrollment = await enrollInEvent(eventId, userId);
         respuesta =res.status(201).json();

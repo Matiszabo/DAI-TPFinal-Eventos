@@ -1,7 +1,5 @@
-// src/controllers/user-controller.js
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import { getUserByUsername, createUser } from '../services/user-service.js';
 
 const router = express.Router();
