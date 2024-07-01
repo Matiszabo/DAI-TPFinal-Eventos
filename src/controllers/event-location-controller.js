@@ -10,6 +10,7 @@ import { authenticateToken } from '../middlewares/auth-middleware.js';
 
 const router = express.Router();
 
+// Obtener todas las ubicaciones de eventos del usuario autenticado
 router.get('/', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit, 10) || 10;
@@ -31,6 +32,7 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 });
 
+// Obtener una ubicación de evento por ID
 router.get('/:id', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const id = req.params.id;
@@ -46,6 +48,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// Crear una nueva ubicación de evento
 router.post('/', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { name, full_address, id_location, max_capacity } = req.body;
@@ -65,7 +68,9 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 });
 
+// Actualizar una ubicación de evento
 router.put('/', authenticateToken, async (req, res) => {
+    let respuesta;
     const userId = req.user.id;
     const { id, name, full_address, id_location, max_capacity } = req.body;
 
@@ -79,14 +84,18 @@ router.put('/', authenticateToken, async (req, res) => {
     try {
         const updatedEventLocation = await updateEventLocation({ id, name, full_address, id_location, max_capacity, id_creator_user: userId });
         if (!updatedEventLocation) {
-            return res.status(404).json({ message: 'Event location not found or not authorized.' });
+            respuesta = res.status(404).json({ message: 'Event location not found or not authorized.' });
+        }else{
+            respuesta = res.status(201).json(updatedEventLocation);
         }
-        res.status(200).json(updatedEventLocation);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        respuesta =res.status(500).json({ message: error.message });
     }
+
+    return respuesta;
 });
 
+// Eliminar una ubicación de evento
 router.delete('/:id', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const id = req.params.id;

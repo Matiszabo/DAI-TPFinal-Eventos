@@ -10,14 +10,15 @@ import {
     searchEvents,
     enrollInEvent,
     removeEnrollment,
-    rateEvent 
-} from '../services/event-service.js'; 
+    rateEvent // Agrega esta línea para importar rateEvent desde event-service.js
+} from '../services/event-service.js'; // Asegúrate de que la ruta sea correcta
 
 import { authenticateToken } from '../middlewares/auth-middleware.js';
-import { cancelEnrollment } from '../services/event-service.js'; 
+import { cancelEnrollment } from '../services/event-service.js'; // Asegúrate de que cancelEnrollment esté disponible en event-service.js
 
 const router = express.Router();
 
+// Crear Evento
 router.post('/', authenticateToken, async (req, res) => {
     const { name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location } = req.body;
     const userId = req.user.id;
@@ -42,6 +43,7 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 });
 
+// Actualizar Evento
 router.put('/', authenticateToken, async (req, res) => {
     const { id, name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location } = req.body;
     const userId = req.user.id;
@@ -71,6 +73,7 @@ router.put('/', authenticateToken, async (req, res) => {
     }
 });
 
+// Eliminar Evento
 router.delete('/:id', authenticateToken, async (req, res) => {
     const eventId = req.params.id;
     const userId = req.user.id;
@@ -81,7 +84,9 @@ router.delete('/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ message: 'Evento no encontrado o no pertenece al usuario.' });
         }
 
-        const hasUsersRegistered = false; 
+        // Validar que no haya usuarios registrados al evento
+        // Este es un ejemplo y debe ser implementado
+        const hasUsersRegistered = false; // Implementar esta lógica
         if (hasUsersRegistered) {
             return res.status(400).json({ message: 'Hay usuarios registrados en el evento.' });
         }
@@ -93,6 +98,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// Obtener detalles de un evento
 router.get('/:id', async (req, res) => {
     const eventId = req.params.id;
 
@@ -107,6 +113,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// Obtener inscripciones de un evento
 router.get('/:id/enrollment', async (req, res) => {
     const eventId = req.params.id;
     try {
@@ -120,6 +127,7 @@ router.get('/:id/enrollment', async (req, res) => {
     }
 });
 
+// Obtener eventos (con filtro de búsqueda)
 router.get('/', async (req, res) => {
     const { name, category, startDate, endDate, page, pageSize } = req.query;
 
@@ -131,42 +139,52 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Inscribirse en un evento
 router.post('/:id/enrollment', authenticateToken, async (req, res) => {
+    let respuesta;
     const eventId = req.params.id;
     const userId = req.user.id;
     console.log("aasd")
     try {
         const enrollment = await enrollInEvent(eventId, userId);
-        res.status(200).json(enrollment);
+        respuesta =res.status(201).json();
     } catch (error) {
-        res.status(error.status || 500).json({ message: error.message });
+        respuesta = res.status(error.status || 500).json({ message: error.message });
     }
+    return respuesta;
 });
 
-router.delete('/:id/enroll', authenticateToken, async (req, res) => {
+// Cancelar inscripción en un evento
+router.delete('/:id/enrollment', authenticateToken, async (req, res) => {
     const eventId = req.params.id;
     const userId = req.user.id;
+    let respuesta;
 
     try {
         await removeEnrollment(eventId, userId);
-        res.status(200).json({ message: 'Inscripción cancelada correctamente.' });
+         respuesta = res.status(200).json({ message: 'Inscripción cancelada correctamente.' });
     } catch (error) {
-        res.status(error.status || 500).json({ message: error.message });
+        respuesta = res.status(error.status || 500).json({ message: error.message });
     }
+    return respuesta;
 });
 
-
-router.patch('/:id/enrollment/:enrollmentId', authenticateToken, async (req, res) => {
+// Calificar un evento
+router.patch('/:id/enrollment/:rating', authenticateToken, async (req, res) => {
     const eventId = req.params.id;
-    const enrollmentId = req.params.enrollmentId;
-    const { rating, observations } = req.body;
-
+    const rating = req.params.rating;
+    const userId = req.user.id;
+    const { observations } = req.body;
+    let respuesta;
     try {
-        await rateEvent(eventId, enrollmentId, rating, observations); 
-        res.status(200).json({ message: 'Evento rankeado correctamente.' });
+        await rateEvent(eventId, userId, rating, observations);
+        respuesta = res.status(200).json({ message: 'Evento rankeado correctamente.' });
     } catch (error) {
-        res.status(error.status || 500).json({ message: error.message });
+        respuesta = res.status(error.status || 500).json({ message: error.message });
     }
+    return respuesta;
 });
 
 export default router;
+
+

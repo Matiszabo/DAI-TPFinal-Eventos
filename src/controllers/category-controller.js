@@ -2,8 +2,10 @@ import express from "express";
 import CategoryService from "../services/category-service.js";
 const router = express.Router();
 
+// Servicio para manejar las operaciones relacionadas con las provincias
 const categoryService = new CategoryService();
 
+// Endpoint GET /api/category
 router.get("/", async (req, res) => {
     try {
         const category = await categoryService.getAllCategory();
@@ -13,6 +15,7 @@ router.get("/", async (req, res) => {
     }
 });
 
+// Endpoint GET /api/category/:id
 router.get("/:id", async (req, res) => {
     const { id } = req.params;
     try {
@@ -27,6 +30,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+// Endpoint POST /api/category
 router.post("/", async (req, res) => {
     const newCategory = req.body;
     try {
@@ -37,6 +41,7 @@ router.post("/", async (req, res) => {
     }
 });
 
+// Endpoint PUT /api/category
 router.put("/", async (req, res) => {
     const updatedCategory = req.body;
     try {
@@ -52,6 +57,7 @@ router.put("/", async (req, res) => {
     }
 });
 
+// Endpoint DELETE /api/category/:id
 router.delete("/:id", async (req, res) => {
     const { id } = req.params;
     try {

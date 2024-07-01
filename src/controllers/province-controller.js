@@ -2,8 +2,10 @@ import express from "express";
 import ProvinceService from "../services/province-service.js";
 const router = express.Router();
 
+// Servicio para manejar las operaciones relacionadas con las provincias
 const provinceService = new ProvinceService();
 
+// Endpoint GET /api/province
 router.get("/", async (req, res) => {
     try {
         const provinces = await provinceService.getAllProvinces();
@@ -13,6 +15,7 @@ router.get("/", async (req, res) => {
     }
 });
 
+// Endpoint GET /api/province/:id
 router.get("/:id", async (req, res) => {
     const { id } = req.params;
     try {
@@ -27,6 +30,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+// Endpoint POST /api/province
 router.post("/", async (req, res) => {
     const newProvince = req.body;
     try {
@@ -37,6 +41,7 @@ router.post("/", async (req, res) => {
     }
 });
 
+// Endpoint PUT /api/province
 router.put("/", async (req, res) => {
     const updatedProvince = req.body;
     try {
@@ -51,6 +56,7 @@ router.put("/", async (req, res) => {
     }
 });
 
+// Endpoint DELETE /api/province/:id
 router.delete("/:id", async (req, res) => {
     const { id } = req.params;
     try {

@@ -4,6 +4,7 @@ const router = express.Router();
 
 const locationService = new LocationService();
 
+// Endpoint GET /api/location
 router.get("/", async (req, res) => {
     try {
         const locations = await locationService.getAllLocations();
@@ -13,6 +14,7 @@ router.get("/", async (req, res) => {
     }
 });
 
+// Endpoint GET /api/location/:id
 router.get("/:id", async (req, res) => {
     const { id } = req.params;
     try {
@@ -27,6 +29,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+// Endpoint GET /api/location/:id/event-location
 router.get("/:id/event-location", async (req, res) => {
     const { id } = req.params;
     try {

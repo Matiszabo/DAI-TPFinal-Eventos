@@ -176,6 +176,7 @@ export const searchEvents = async (filters) => {
 export const enrollInEventRepo = async (eventId, userId) => {
     const client = await pool.connect();
     try {
+        // Verificar si el evento existe y está habilitado para inscripción
         const eventRes = await client.query('SELECT * FROM events WHERE id = $1', [eventId]);
         const event = eventRes.rows[0];
         
@@ -189,17 +190,20 @@ export const enrollInEventRepo = async (eventId, userId) => {
             throw { status: 400, message: 'El evento ya ha sucedido o es hoy.' };
         }
         
+        // Verificar si el usuario ya está registrado
         const userEnrollmentRes = await client.query('SELECT * FROM event_enrollments WHERE id_event = $1 AND id_user = $2', [eventId, userId]);
         if (userEnrollmentRes.rows.length > 0) {
             throw { status: 400, message: 'El usuario ya está registrado en el evento.' };
         }
         
+        // Verificar la capacidad del evento
         const enrollmentsRes = await client.query('SELECT COUNT(*) FROM event_enrollments WHERE id_event = $1', [eventId]);
         const enrolledCount = parseInt(enrollmentsRes.rows[0].count, 10);
         if (enrolledCount >= event.max_assistance) {
             throw { status: 400, message: 'Excedido el límite de asistencia.' };
         }
 
+        // Registrar al usuario
         const registrationDateTime = new Date();
         const res = await client.query(
             'INSERT INTO event_enrollments (id_event, id_user, registration_date_time) VALUES ($1, $2, $3) RETURNING *',
@@ -214,6 +218,7 @@ export const enrollInEventRepo = async (eventId, userId) => {
 export const removeEnrollmentRepo = async (eventId, userId) => {
     const client = await pool.connect();
     try {
+        // Verificar si el evento existe y no ha sucedido aún
         const eventRes = await client.query('SELECT * FROM events WHERE id = $1', [eventId]);
         const event = eventRes.rows[0];
 
@@ -224,11 +229,13 @@ export const removeEnrollmentRepo = async (eventId, userId) => {
             throw { status: 400, message: 'El evento ya ha sucedido o es hoy.' };
         }
 
+        // Verificar si el usuario está registrado
         const userEnrollmentRes = await client.query('SELECT * FROM event_enrollments WHERE id_event = $1 AND id_user = $2', [eventId, userId]);
         if (userEnrollmentRes.rows.length === 0) {
             throw { status: 400, message: 'El usuario no está registrado en el evento.' };
         }
 
+        // Eliminar la inscripción
         await client.query('DELETE FROM event_enrollments WHERE id_event = $1 AND id_user = $2', [eventId, userId]);
     } finally {
         client.release();
@@ -237,7 +244,7 @@ export const removeEnrollmentRepo = async (eventId, userId) => {
 
 export const getEventEnrollments = async (eventId, filters) => {
     const client = await pool.connect();
-    const { first_name, last_name, username, attended, rating } = filters || {}; 
+    const { first_name, last_name, username, attended, rating } = filters || {}; // Asegurarse de que los filtros estén definidos o usar un objeto vacío
     const conditions = [];
     const values = [eventId];
 
@@ -280,24 +287,73 @@ export const getEventEnrollments = async (eventId, filters) => {
 };
 
 
-export const rateEventRepo = async (eventId, enrollmentId, rating, observations) => {
+
+export const rateEventRepo = async (eventId, userId, rating, observations) => {
     const client = await pool.connect();
     try {
-        const enrollmentRes = await client.query('SELECT * FROM event_enrollments WHERE id = $1 AND id_event = $2', [enrollmentId, eventId]);
+        // Verificar si el usuario está registrado al evento
+        const enrollmentRes = await client.query('SELECT * FROM event_enrollments WHERE id_user = $1 AND id_event = $2', [userId, eventId]);
         if (enrollmentRes.rows.length === 0) {
-            throw { status: 400, message: 'El usuario no está registrado al evento.' };
+            return { status: 400, message: 'El usuario no está registrado al evento.' };
         }
 
-        const eventRes = await client.query('SELECT * FROM events WHERE id = $1 AND start_date <= NOW()', [eventId]);
-        if (eventRes.rows.length === 0) {
-            throw { status: 400, message: 'El evento no ha finalizado aún.' };
+
+        // const eventRes = this.getEventById(eventId);
+        // Verificar si el evento ha finalizado
+    const eventRes = await client.query('SELECT * FROM events WHERE id = $1', [eventId]);
+    const event = eventRes.rows[0];
+        if (!eventRes) {
+            return { status: 404, message: 'Evento no encontrado.' };
         }
 
+        const currentTime = new Date();
+        const eventEndDate = new Date(event.start_date);
+
+        console.log('Hora actual:', currentTime);
+        console.log('Fecha de finalización del evento:', eventEndDate);
+
+        // Verificar que el rating esté en el rango correcto
         if (rating < 1 || rating > 10) {
-            throw { status: 400, message: 'El rating debe estar entre 1 y 10 (inclusive).' };
+            return { status: 400, message: 'El rating debe estar entre 1 y 10 (inclusive).' };
         }
 
-        await client.query('UPDATE event_enrollments SET rating = $1, observations = $2 WHERE id = $3', [rating, observations, enrollmentId]);
+        // Verificar si el evento ha finalizado antes de actualizar
+        if (eventEndDate >= currentTime) {
+            return { status: 400, message: 'El evento no ha finalizado aún.' };
+        }
+
+        // Asegurarse de que el rating sea un número
+        const numericRating = Number(rating);
+
+        // Verificar el estado antes de la actualización
+        const preUpdateRes = await client.query('SELECT rating, observations FROM event_enrollments WHERE id_event = $1 AND id_user = $2', [eventId, userId]);
+        console.log('Estado antes de la actualización:', preUpdateRes.rows);
+        // if (hay rows??)
+        // Actualizar el rating y las observaciones en la inscripción
+        const updateQuery = 'UPDATE event_enrollments SET rating = $1, observations = $2 WHERE id_event = $3 AND id_user = $4';
+        const updateValues = [numericRating, observations, eventId, userId]; 
+
+        console.log('Consulta de actualización:', updateQuery);
+        console.log('Valores de actualización:', updateValues);
+
+        const updateRes = await client.query(updateQuery, updateValues);
+
+        console.log('Resultado de la actualización:', updateRes.rows);
+
+        if (updateRes.rowCount === 0) {
+            return { status: 500, message: 'Error al actualizar el rating.' };
+        }
+
+        // Verificar que el rating realmente se haya actualizado
+        const postUpdateRes = await client.query('SELECT rating, observations FROM event_enrollments WHERE id = $1', [enrollmentId]);
+        console.log('Verificación después de la actualización:', postUpdateRes.rows);
+
+        // Verificación adicional para asegurar que el valor se actualizó correctamente
+        if (postUpdateRes.rows[0].rating !== numericRating) {
+            return { status: 500, message: 'El rating no se actualizó correctamente en la base de datos.' };
+        }
+
+        return { message: 'Evento rankeado correctamente.' };
     } finally {
         client.release();
     }

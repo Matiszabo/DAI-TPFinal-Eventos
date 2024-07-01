@@ -9,9 +9,10 @@ import {
     searchEvents as searchEventsRepo,
     enrollInEventRepo,
     removeEnrollmentRepo,
-    rateEventRepo
+    rateEventRepo // Agrega la importación de rateEventRepo
 } from '../repositories/event-repository.js';
 
+// Definir funciones de servicio usando las funciones del repositorio
 export const createEvent = async (eventData) => {
     return createEventRepo(eventData);
 };
@@ -56,6 +57,6 @@ export const cancelEnrollment = async (eventId, userId) => {
     return removeEnrollmentRepo(eventId, userId);
 };
 
-export const rateEvent = async (eventId, enrollmentId, rating, observations) => {
-    return rateEventRepo(eventId, enrollmentId, rating, observations);
+export const rateEvent = async (eventId, userId, rating, observations) => {
+    return await rateEventRepo(eventId, userId, rating, observations);
 };

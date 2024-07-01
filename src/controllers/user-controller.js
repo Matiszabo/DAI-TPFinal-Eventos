@@ -1,9 +1,12 @@
+// src/controllers/user-controller.js
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { getUserByUsername, createUser } from '../services/user-service.js';
 
 const router = express.Router();
 
+// Login Endpoint
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     console.log('username:', username);
@@ -37,6 +40,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Register Endpoint
 router.post('/register', async (req, res) => {
     const { first_name, last_name, username, password } = req.body;
 

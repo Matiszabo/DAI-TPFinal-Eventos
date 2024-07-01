@@ -1,3 +1,4 @@
+// src/repositories/user-repository.js
 import pool from '../configs/db-config.js';
 
 export const getUserByUsername = async (username, password) => {
@@ -5,6 +6,7 @@ export const getUserByUsername = async (username, password) => {
     const client = await pool.connect();
     try {
         const res = await client.query('SELECT * FROM users WHERE username = $1 AND password = $2', [username, password]);
+        //console.log('User from DB:', res.rows[0]);
         if (res.rows.length > 0 ){
             respuesta = res.rows[0];
         }
@@ -15,6 +17,7 @@ export const getUserByUsername = async (username, password) => {
 };
 
 export const createUser = async (userData) => {
+    //const { first_name, last_name, username, password } = userData;
     const client = await pool.connect();
     try {
         const res = await client.query(
