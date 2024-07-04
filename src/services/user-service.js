@@ -1,6 +1,6 @@
-    import { getUserByUsername, createUser } from '../repositories/user-repository.js';
+import { getUserByUsername, createUser } from '../repositories/user-repository.js';
 
-    export {
-        getUserByUsername,
-        createUser
-    };
+export {
+    getUserByUsername,
+    createUser
+};
