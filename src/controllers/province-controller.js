@@ -1,74 +1,50 @@
-import express from "express";
-import ProvinceService from "../services/province-service.js";
-const router = express.Router();
+import { Router } from 'express';
+import ProvinceService from '../service/province-service.js';
 
-// Servicio para manejar las operaciones relacionadas con las provincias
-const provinceService = new ProvinceService();
+const router = Router();
+const svc = new ProvinceService();
 
-// Endpoint GET /api/province
-router.get("/", async (req, res) => {
-    try {
-        const provinces = await provinceService.getAllProvinces();
-        res.status(200).json(provinces);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+const handleRequest = (serviceMethod) => async (req, res) => {
+	try {
+		const [response, status] = await serviceMethod(req);
+		return res.status(status).json(response);
+	} catch (error) {
+		console.error(`Controller error - ${req.method} ${req.path} : `, error);
+		return res.status(500).send({
+			success: false,
+			message: `Controller error - ${req.method} ${req.path}`,
+		});
+	}
+};
 
-// Endpoint GET /api/province/:id
-router.get("/:id", async (req, res) => {
-    const { id } = req.params;
-    try {
-        const province = await provinceService.getProvinceById(id);
-        if (province) {
-            res.status(200).json(province);
-        } else {
-            res.status(404).json({ message: "Province not found" });
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+router.get(
+	'/',
+	handleRequest(() => svc.getProvinces()),
+);
 
-// Endpoint POST /api/province
-router.post("/", async (req, res) => {
-    const newProvince = req.body;
-    try {
-        const createdProvince = await provinceService.createProvince(newProvince);
-        res.status(201).json(createdProvince);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-});
+router.get(
+	'/:id',
+	handleRequest((req) => svc.getProvinceById(req.params.id)),
+);
 
-// Endpoint PUT /api/province
-router.put("/", async (req, res) => {
-    const updatedProvince = req.body;
-    try {
-        const result = await provinceService.updateProvince(updatedProvince);
-        if (result.modifiedCount === 1) {
-            res.status(201).json({ message: "Province updated successfully" });
-        } else {
-            res.status(404).json({ message: "Province not found" });
-        }
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-});
+router.get(
+	'/:id/locations',
+	handleRequest((req) => svc.getLocationsByProvince(req.params.id)),
+);
 
-// Endpoint DELETE /api/province/:id
-router.delete("/:id", async (req, res) => {
-    const { id } = req.params;
-    try {
-        const result = await provinceService.deleteProvince(id);
-        if (result.deletedCount === 1) {
-            res.status(200).json({ message: "Province deleted successfully" });
-        } else {
-            res.status(404).json({ message: "Province not found" });
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+router.post(
+	'/',
+	handleRequest((req) => svc.addProvince(req.body)),
+);
+
+router.put(
+	'/',
+	handleRequest((req) => svc.updateProvince(req.body)),
+);
+
+router.delete(
+	'/:id',
+	handleRequest((req) => svc.deleteProvince(req.params.id)),
+);
 
 export default router;

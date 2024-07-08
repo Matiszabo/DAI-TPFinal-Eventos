@@ -1,35 +1,43 @@
-import pool from "../configs/db-config.js";
+import config from '../configs/db-config.js';
+import pkg from 'pg';
 
-class LocationRepository {
-    async getAll() {
-        const client = await pool.connect();
-        try {
-            const result = await client.query('SELECT * FROM locations');
-            return result.rows;
-        } finally {
-            client.release();
-        }
-    }
+const { Pool } = pkg;
+const pool = new Pool(config);
 
-    async getById(id) {
-        const client = await pool.connect();
-        try {
-            const result = await client.query('SELECT * FROM locations WHERE id = $1', [id]);
-            return result.rows[0];
-        } finally {
-            client.release();
-        }
-    }
+export default class LocationRepository {
+	async getLocations({ id }) {
+		const client = await pool.connect();
+		let query = 'SELECT * FROM locations';
+		const params = [];
+		const values = [];
+		let cont = 1;
 
-    async getEventLocationsByLocationId(id) {
-        const client = await pool.connect();
-        try {
-            const result = await client.query('SELECT * FROM event_locations WHERE location_id = $1', [id]);
-            return result.rows;
-        } finally {
-            client.release();
-        }
-    }
+		if (id) {
+			params.push(`id = $${cont}`);
+			values.push(id);
+			cont++;
+		}
+
+		if (params.length > 0) {
+			query += ' WHERE ' + params.join(' AND ');
+		}
+		try {
+			const result = await client.query(query, values);
+			return result.rows;
+		} finally {
+			client.release();
+		}
+	}
+
+	async getEventLocations(id) {
+		const client = await pool.connect();
+		const query = 'SELECT * FROM event_locations where id_location = $1';
+		const values = [id];
+		try {
+			const result = await client.query(query, values);
+			return result.rows;
+		} finally {
+			client.release();
+		}
+	}
 }
-
-export default LocationRepository;
