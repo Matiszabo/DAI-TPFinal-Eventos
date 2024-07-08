@@ -1,11 +1,12 @@
-import 'dotenv/config';
+// src/db-config.js
+import pg from 'pg';
 
-const DBConfig = {
-	host        : process.env.DB_HOST ?? 'localhost',
-	database    : process.env.DB_DATABASE ?? 'Tpfinal',
-	user        : process.env.DB_USER ?? 'postgres',
-	password    : process.env.DB_PASSWORD ?? 'root',
-	port        : process.env.DB_PORT ?? 5432,
-};
+const pool = new pg.Pool({
+    host: 'localhost',
+    database: 'dai-events',
+    user: 'postgres',
+    password: 'root',
+    port: 5432, // Puerto por defecto de PostgreSQL
+});
 
-export default DBConfig;
+export default pool;

@@ -1,40 +1,32 @@
-import config from '../configs/db-config.js';
-import pkg from 'pg';
+// src/repositories/user-repository.js
+import pool from '../configs/db-config.js';
 
-const { Pool } = pkg;
-const pool = new Pool(config);
+export const getUserByUsername = async (username, password) => {
+    let respuesta = null;
+    const client = await pool.connect();
+    try {
+        const res = await client.query('SELECT * FROM users WHERE username = $1 AND password = $2', [username, password]);
+        //console.log('User from DB:', res.rows[0]);
+        if (res.rows.length > 0 ){
+            respuesta = res.rows[0];
+        }
+    } finally {
+        client.release();
+    }
+    return respuesta;
+};
 
-export default class UserRepository {
-	async getUser(username) {
-		const client = await pool.connect();
-		try {
-			let sql = 'SELECT * FROM Users WHERE username = $1';
-			const result = await client.query(sql, [username]);
-			return result.rows;
-		} finally {
-			client.release();
-		}
-	}
-
-	async getUsers() {
-		const client = await pool.connect();
-		try {
-			let sql = 'SELECT * FROM Users';
-			const result = await client.query(sql);
-			return result.rows;
-		} finally {
-			client.release();
-		}
-	}
-
-	async addUser({ first_name, last_name, username, password }) {
-		const client = await pool.connect();
-		try {
-			let sql =
-				'INSERT INTO Users (first_name, last_name, username, password) VALUES ($1, $2, $3, $4)';
-			await client.query(sql, [first_name, last_name, username, password]);
-		} finally {
-			client.release();
-		}
-	}
-}
+export const createUser = async (userData) => {
+    //const { first_name, last_name, username, password } = userData;
+    const client = await pool.connect();
+    try {
+        const res = await client.query(
+            'INSERT INTO users (first_name, last_name, username, password) VALUES ($1, $2, $3, $4) RETURNING *',
+            [userData.first_name, userData.last_name, userData.username, userData.password]
+        );
+        console.log('New User:', res.rows[0]);
+        return res.rows[0];
+    } finally {
+        client.release();
+    }
+};

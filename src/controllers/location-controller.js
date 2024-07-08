@@ -1,37 +1,47 @@
-import { Router } from 'express';
-import LocationService from '../service/location-service.js';
-import authMiddleware from '../middlewares/auth-middleware.js';
+import express from "express";
+import LocationService from "../services/location-service.js";
+const router = express.Router();
 
-const router = Router();
-const svc = new LocationService();
+const locationService = new LocationService();
 
-const handleRequest = (serviceMethod) => async (req, res) => {
-	try {
-		const [response, status] = await serviceMethod(req);
-		return res.status(status).json(response);
-	} catch (error) {
-		console.error(`Controller error - ${req.method} ${req.path} : `, error);
-		return res.status(500).send({
-			success: false,
-			message: `Controller error - ${req.method} ${req.path}`,
-		});
-	}
-};
+// Endpoint GET /api/location
+router.get("/", async (req, res) => {
+    try {
+        const locations = await locationService.getAllLocations();
+        res.status(200).json(locations);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
-router.get(
-	'/',
-	handleRequest(() => svc.getLocations()),
-);
+// Endpoint GET /api/location/:id
+router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const location = await locationService.getLocationById(id);
+        if (location) {
+            res.status(200).json(location);
+        } else {
+            res.status(404).json({ message: "Location not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
-router.get(
-	'/:id',
-	handleRequest((req) => svc.getLocations(req.params.id)),
-);
-
-router.get(
-	'/:id/event-location',
-	authMiddleware,
-	handleRequest((req) => svc.getEventLocations(req.params.id)),
-);
+// Endpoint GET /api/location/:id/event-location
+router.get("/:id/event-location", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const eventLocations = await locationService.getEventLocationsByLocationId(id);
+        if (eventLocations) {
+            res.status(200).json(eventLocations);
+        } else {
+            res.status(404).json({ message: "Location not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 export default router;
