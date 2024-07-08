@@ -1,6 +1,5 @@
 import pool from "../configs/db-config.js";
 
-
 export const createEvent = async (eventData) => {
     const { name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location, userId } = eventData;
     const client = await pool.connect();

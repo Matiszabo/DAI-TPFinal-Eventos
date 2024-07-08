@@ -1,6 +1,5 @@
 import CategoryRepository from "../repositories/category-repository.js";
 
-
 class CategoryService {
     constructor() {
         this.categoryRepository = new CategoryRepository();

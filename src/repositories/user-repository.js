@@ -1,4 +1,3 @@
-// src/repositories/user-repository.js
 import pool from '../configs/db-config.js';
 
 export const getUserByUsername = async (username, password) => {
