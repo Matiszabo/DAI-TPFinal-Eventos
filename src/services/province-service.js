@@ -1,29 +1,30 @@
-import ProvinceRepository from "../repositories/province-repository.js";
+import ProvinceRepository from '../repositories/province-repository.js';
 
-class ProvinceService {
-    constructor() {
-        this.provinceRepository = new ProvinceRepository();
+export default class ProvinceService{
+    getAllSync = async () => {
+        const repo = new ProvinceRepository();
+        let returnArray = await repo.getAllSync();
+        return returnArray;
     }
-
-    async getAllProvinces() {
-        return await this.provinceRepository.getAll();
+    
+    getByIdSync = async (id) => {
+        const repo = new ProvinceRepository();
+        let returnObject = await repo.getByIdSync(id);
+        return returnObject;
     }
-
-    async getProvinceById(id) {
-        return await this.provinceRepository.getById(id);
+    createAsync = async (entity) => {
+        const repo = new ProvinceRepository();
+        let response = await repo.createAsync(entity);
+        return response;
     }
-
-    async createProvince(province) {
-        return await this.provinceRepository.create(province);
+    updateAsync = async (entity) => {
+        const repo = new ProvinceRepository();
+        let response = await repo.updateAsync(entity);
+        return response;
     }
-
-    async updateProvince(province) {
-        return await this.provinceRepository.update(province);
-    }
-
-    async deleteProvince(id) {
-        return await this.provinceRepository.delete(id);
+    deleteByIdAsync = async (id) => {
+        const repo = new ProvinceRepository();
+        let response = await repo.deleteByIdAsync(id);
+        return response;
     }
 }
-
-export default ProvinceService;

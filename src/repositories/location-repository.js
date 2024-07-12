@@ -1,35 +1,54 @@
-import pool from "../configs/db-config.js";
+import DBConfig from './../configs/db-config.js';
+import pkg from 'pg';
+const { Client } = pkg;
 
-class LocationRepository {
-    async getAll() {
-        const client = await pool.connect();
+export default class LocationRepository{
+    getAllSync = async () => {
+        let returnArray = null;
+        const client = new Client(DBConfig);
         try {
-            const result = await client.query('SELECT * FROM locations');
-            return result.rows;
-        } finally {
-            client.release();
+            await client.connect();
+            const sql = 'SELECT * FROM locations';
+            const result = await client.query(sql);
+            await client.end();
+            returnArray = result.rows;
         }
+        catch (error){
+            console.log(error);
+        }
+        return returnArray;
     }
-
-    async getById(id) {
-        const client = await pool.connect();
+    
+    getByIdSync = async (id) => {
+        let returnObject = null;
+        const client = new Client(DBConfig);
         try {
-            const result = await client.query('SELECT * FROM locations WHERE id = $1', [id]);
-            return result.rows[0];
-        } finally {
-            client.release();
+            await client.connect();
+            const sql = 'SELECT * from locations WHERE id=$1';
+            const values = [id];
+            const result = await client.query(sql, values);
+            await client.end();
+            returnObject = result.rows[0];
         }
+        catch (error){
+            console.log(error);
+        }
+        return returnObject;
     }
-
-    async getEventLocationsByLocationId(id) {
-        const client = await pool.connect();
+    getByEventLocationIdSync = async (id) => {
+        let returnObject = null;
+        const client = new Client(DBConfig);
         try {
-            const result = await client.query('SELECT * FROM event_locations WHERE location_id = $1', [id]);
-            return result.rows;
-        } finally {
-            client.release();
+            await client.connect();
+            const sql = 'SELECT * from event_locations WHERE id_location=$1';
+            const values = [id];
+            const result = await client.query(sql, values);
+            await client.end();
+            returnObject = result.rows[0];
         }
+        catch (error){
+            console.log(error);
+        }
+        return returnObject;
     }
 }
-
-export default LocationRepository;

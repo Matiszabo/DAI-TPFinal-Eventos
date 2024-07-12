@@ -1,71 +1,73 @@
-// src/controllers/user-controller.js
-import express from 'express';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { getUserByUsername, createUser } from '../services/user-service.js';
+import {Router} from 'express';
+import UserService from '../services/user-service.js';
+import User from '../entities/user.js'
+import ValidationHelper from '../helpers/validation-helper.js';
+import AuthenticationMiddleware from '../middlewares/AuthenticationMiddleware.js'
+const router = Router();
+const svc = new UserService();
+const mw = new AuthenticationMiddleware();
 
-const router = express.Router();
-
-// Login Endpoint
 router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-    console.log('username:', username);
-    console.log('password:', password);
-
-    try {
-        const user = await getUserByUsername(username, password);
-        console.log('User retrieved from DB:', user);
-
-        if (user == null) {
-            console.log('User not found');
-            return res.status(401).json({
-                success: false,
-                message: 'Usuario o clave inválida.',
-                token: ''
-            });
+    let respuesta;
+    const token = await svc.verifyAsync(req.body.username, req.body.password);
+    let objeto = {
+        success: true,
+        message: "",
+        token: null
+    }
+    if(token != null){
+        if(token.length>50){
+            objeto.token = token;
+            respuesta = res.status(200).send(objeto);
+        }else{
+            objeto.token = token;
+            objeto.success = false;
+            respuesta = res.status(400).send(objeto);
         }
         
-        console.log('OK',user);
-        const token = jwt.sign(user, 'your_jwt_secret', { expiresIn: '1h' });
-        console.log('Generated token:', token);
-
-        res.status(200).json({
-            success: true,
-            message: 'Login exitoso.',
-            token: token
-        });
-    } catch (error) {
-        console.error('Error during login:', error);
-        res.status(500).json({ success: false, message: error.message });
+    }else{
+        respuesta = res.status(500).send('Error interno.');
     }
-});
-
-// Register Endpoint
+})
 router.post('/register', async (req, res) => {
-    const { first_name, last_name, username, password } = req.body;
-
-    if (!first_name || !last_name) {
-        return res.status(400).json({ message: 'Los campos first_name o last_name están vacíos.' });
+    let respuesta;
+    let usuario = new User(0,req.body.first_name,req.body.last_name,req.body.username,req.body.password)
+    const returnArray = await svc.createAsync(usuario);
+    if(returnArray == 1){
+        respuesta = res.status(200).send('Se ha creado correctamente');
+    }else{
+        respuesta = res.status(500).send('Error interno.');
     }
+})
 
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(username)) {
-        return res.status(400).json({ message: 'El email (username) es sintácticamente inválido.' });
-    }
+router.put('', async (req, res) => {
+    let respuesta;
 
-    if (password.length < 3) {
-        return res.status(400).json({ message: 'El campo password tiene menos de 3 letras.' });
+    let event_categorie = new Event_categorie(req.body.id,req.body.name,req.body.display_order)
+    const returnArray = await svc.updateAsync(event_categorie);
+    if(returnArray == 1){
+        respuesta = res.status(200).send('Se ha cambiado correctamente');
+    }else{
+        respuesta = res.status(500).send('Error interno.');
     }
+})
 
-    try {
-        //const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await createUser({ first_name, last_name, username, password});
-        console.log('New user created:', newUser);
-        res.status(201).json({ message: 'Usuario registrado exitosamente.' });
-    } catch (error) {
-        console.error('Error during registration:', error);
-        res.status(500).json({ message: error.message });
+router.delete('/:id', async (req, res) => {
+    let respuesta;
+    const returnArray = await svc.deleteByIdAsync(req.params.id);
+
+    if(ValidationHelper.ValidaNumero(req.params.id)){
+        respuesta = res.status(200).send("No se escribio un numero")
+    }else{
+        if(returnArray == 1){
+            respuesta = res.status(200).send('Se ha eliminado correctamente');
+        }else if(returnArray == 0){
+            respuesta = res.status(200).send('No hay ninguna provincia con ese id');
+        }else{
+            respuesta = res.status(500).send('error interno');
+        }
     }
-});
+    
+})
 
 export default router;

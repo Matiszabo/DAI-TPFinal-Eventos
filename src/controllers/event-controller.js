@@ -1,190 +1,146 @@
-import express from 'express';
-import {
-    createEvent,
-    updateEvent,
-    deleteEvent,
-    getEventById,
-    getEventDetailsById,
-    getEventEnrollments,
-    getEvents,
-    searchEvents,
-    enrollInEvent,
-    removeEnrollment,
-    rateEvent // Agrega esta línea para importar rateEvent desde event-service.js
-} from '../services/event-service.js'; // Asegúrate de que la ruta sea correcta
+import {Router} from 'express';
+import EventService from './../services/event-service.js';
+import Event from './../entities/event.js';
+import AuthenticationMiddleware from '../middlewares/AuthenticationMiddleware.js';
+const router = Router();
+const svc = new EventService();
+const svcA = new AuthenticationMiddleware();
 
-import { authenticateToken } from '../middlewares/auth-middleware.js';
-import { cancelEnrollment } from '../services/event-service.js'; // Asegúrate de que cancelEnrollment esté disponible en event-service.js
-
-const router = express.Router();
-
-// Crear Evento
-router.post('/', authenticateToken, async (req, res) => {
-    const { name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location } = req.body;
-    const userId = req.user.id;
-
-    if (!name || !description || name.length < 3 || description.length < 3) {
-        return res.status(400).json({ message: 'El nombre o la descripción son inválidos.' });
+router.get('', async (req, res) => {
+    let response;
+    const searchParams = [req.query.name, req.query.category, req.query.startdate, req.query.tag, req.query.eventlocation];
+    const returnObject = await svc.getSearchSync(searchParams);
+    if (returnObject != null){
+        response = res.status(200).json(returnObject)
     }
-
-    if (max_assistance > max_capacity) {
-        return res.status(400).json({ message: 'El max_assistance es mayor que el max_capacity.' });
-    }
-
-    if (price < 0 || duration_in_minutes < 0) {
-        return res.status(400).json({ message: 'El precio o la duración son inválidos.' });
-    }
-
-    try {
-        const newEvent = await createEvent({ name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location, userId });
-        res.status(201).json(newEvent);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    else {
+        response = res.status(404).send("Id no encontrado.");
+    };
+    return response;
 });
 
-// Actualizar Evento
-router.put('/', authenticateToken, async (req, res) => {
-    const { id, name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location } = req.body;
-    const userId = req.user.id;
-
-    if (!name || !description || name.length < 3 || description.length < 3) {
-        return res.status(400).json({ message: 'El nombre o la descripción son inválidos.' });
-    }
-
-    if (max_assistance > max_capacity) {
-        return res.status(400).json({ message: 'El max_assistance es mayor que el max_capacity.' });
-    }
-
-    if (price < 0 || duration_in_minutes < 0) {
-        return res.status(400).json({ message: 'El precio o la duración son inválidos.' });
-    }
-
-    try {
-        const event = await getEventById(id);
-        if (!event || event.user_id !== userId) {
-            return res.status(404).json({ message: 'Evento no encontrado o no pertenece al usuario.' });
-        }
-
-        const updatedEvent = await updateEvent({ id, name, description, max_assistance, max_capacity, price, duration_in_minutes, id_event_location });
-        res.status(200).json(updatedEvent);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Eliminar Evento
-router.delete('/:id', authenticateToken, async (req, res) => {
-    const eventId = req.params.id;
-    const userId = req.user.id;
-
-    try {
-        const event = await getEventById(eventId);
-        if (!event || event.user_id !== userId) {
-            return res.status(404).json({ message: 'Evento no encontrado o no pertenece al usuario.' });
-        }
-
-        // Validar que no haya usuarios registrados al evento
-        // Este es un ejemplo y debe ser implementado
-        const hasUsersRegistered = false; // Implementar esta lógica
-        if (hasUsersRegistered) {
-            return res.status(400).json({ message: 'Hay usuarios registrados en el evento.' });
-        }
-
-        await deleteEvent(eventId);
-        res.status(200).json({ message: 'Evento eliminado correctamente.' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Obtener detalles de un evento
 router.get('/:id', async (req, res) => {
-    const eventId = req.params.id;
-
-    try {
-        const eventDetails = await getEventDetailsById(eventId);
-        if (!eventDetails) {
-            return res.status(404).json({ message: 'Evento no encontrado.' });
-        }
-        res.status(200).json(eventDetails);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    let response;
+    const returnObject = await svc.getByIdSync(req.params.id);
+    if (returnObject != null){
+        response = res.status(200).json(returnObject)
     }
+    else {
+        response = res.status(404).send("Id no encontrado.");
+    };
+    return response;
 });
 
-// Obtener inscripciones de un evento
 router.get('/:id/enrollment', async (req, res) => {
-    const eventId = req.params.id;
-    try {
-        const enrollments = await getEventEnrollments(eventId);
-        if (!enrollments) {
-            return res.status(404).json({ message: 'No se encontraron inscripciones para este evento.' });
+    let response;
+    const searchParams = [req.query.first_name, req.query.last_name, req.query.username, req.query.attended, req.query.rating];
+    const returnObject = await svc.getEnrollmentById(req.params.id, searchParams);
+    if (returnObject != null){
+        response = res.status(200).json(returnObject)
+    }
+    else {
+        response = res.status(404).send("Id no encontrado o evento sin inscripciones.");
+    };
+    return response;
+});
+
+router.post('/:id/enrollment', svcA.AuthMiddleware, async (req, res) => {
+    let response;
+    response = await svc.enrollUser(req.params.id, req.user.id);
+    if (typeof(response) === 'string'){
+        if (response === 'ID_ERROR'){
+            response = res.status(404).send("Id no encontrado");
         }
-        res.status(200).json(enrollments);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+        else{
+            response = res.status(400).send(response)
+        }
     }
+    else {
+        response = res.status(201).send('Usuario inscripto');
+    };
+    return response;
 });
 
-// Obtener eventos (con filtro de búsqueda)
-router.get('/', async (req, res) => {
-    const { name, category, startDate, endDate, page, pageSize } = req.query;
-
-    try {
-        const events = await searchEvents({ name, category, startDate, endDate, page, pageSize });
-        res.status(200).json(events);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+router.patch('/:id/enrollment/:rating', svcA.AuthMiddleware, async (req, res) => {
+    let response;
+    const params = [parseInt(req.params.id), parseInt(req.params.rating), req.body.observations, req.user.id];
+    response = await svc.patchEnrollment(params);
+    if (typeof(response) === 'string'){
+        if (response === 'ID_ERROR'){
+            response = res.status(404).send("Id no encontrado");
+        }
+        else{
+            response = res.status(400).send(response);
+        }
     }
+    else {
+        response = res.status(200).send("Se actualizo el enrollment correctamente.");
+    };
+    return response;
 });
 
-// Inscribirse en un evento
-router.post('/:id/enrollment', authenticateToken, async (req, res) => {
+router.delete('/:id/enrollment', svcA.AuthMiddleware, async (req, res) => {
+    let response;
+    response = await svc.deleteEnrollmentById(req.params.id, req.user.id);
+    if (typeof(response) === 'string'){
+        if (response === 'ID_ERROR'){
+            response = res.status(404).send("Id no encontrado");
+        }
+        else{
+            response = res.status(400).send(response)
+        }
+    }
+    else {
+        response = res.status(201).send('Inscripcion eliminada.');
+    };
+    return response;
+});
+
+router.post('', svcA.AuthMiddleware, async (req, res) => {
+    let response;
+    const event = new Event(undefined, req.body.name, req.body.description, req.body.id_event_category, req.body.id_event_location, req.body.start_date, req.body.duration_in_minutes, req.body.price, req.body.enabled_for_enrollment, req.body.max_assistance, req.user.id);
+    response = await svc.createAsync(event);
+    if (typeof(response) === 'string'){
+        response = res.status(400).send(response);
+    }
+    else if (response == 1){
+        response = res.status(201).send('Se creo correctamente el objeto.');
+    }
+    else{
+        response = res.status(400).send('Ha ocurrido un error');
+    }
+    return response;
+});
+
+router.put('', svcA.AuthMiddleware, async (req, res) => {
+    let response;
+    const event = new Event(req.body.id, req.body.name, req.body.description, req.body.id_event_category, req.body.id_event_location, req.body.start_date, req.body.duration_in_minutes, req.body.price, req.body.enabled_for_enrollment, req.body.max_assistance, req.user.id);
+    response = await svc.updateAsync(event);
+    if (typeof(response) === 'string'){
+        response = res.status(400).send(response);
+    }
+    else if (response == 1){
+        response = res.status(201).send('Se actualizo correctamente el objeto.');
+    }
+    else{
+        response = res.status(400).send('Ha ocurrido un error');
+    }
+    return response;
+});
+
+router.delete('/:id', async (req, res) => {
     let respuesta;
-    const eventId = req.params.id;
-    const userId = req.user.id;
-    console.log("aasd")
-    try {
-        const enrollment = await enrollInEvent(eventId, userId);
-        respuesta =res.status(201).json();
-    } catch (error) {
-        respuesta = res.status(error.status || 500).json({ message: error.message });
+    const response = await svc.deleteByIdAsync(req.params.id);
+    if (response == 1){
+        respuesta = res.status(200).send("Objeto borrado.");
+    }
+    else if (response > 1){
+        respuesta = res.status(400).send("Mas de un objeto borrado.");
+    }
+    else if (response < 1){
+        respuesta = res.status(404).send("No se ha borrado el objeto.");
     }
     return respuesta;
-});
-
-// Cancelar inscripción en un evento
-router.delete('/:id/enrollment', authenticateToken, async (req, res) => {
-    const eventId = req.params.id;
-    const userId = req.user.id;
-    let respuesta;
-
-    try {
-        await removeEnrollment(eventId, userId);
-         respuesta = res.status(200).json({ message: 'Inscripción cancelada correctamente.' });
-    } catch (error) {
-        respuesta = res.status(error.status || 500).json({ message: error.message });
-    }
-    return respuesta;
-});
-
-// Calificar un evento
-router.patch('/:id/enrollment/:rating', authenticateToken, async (req, res) => {
-    const eventId = req.params.id;
-    const rating = req.params.rating;
-    const userId = req.user.id;
-    const { observations } = req.body;
-    let respuesta;
-    try {
-        await rateEvent(eventId, userId, rating, observations);
-        respuesta = res.status(200).json({ message: 'Evento rankeado correctamente.' });
-    } catch (error) {
-        respuesta = res.status(error.status || 500).json({ message: error.message });
-    }
-    return respuesta;
-});
+})
 
 export default router;
-
-

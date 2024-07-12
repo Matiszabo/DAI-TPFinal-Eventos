@@ -1,0 +1,668 @@
+{
+	"info": {
+		"_postman_id": "bcbb8b86-0d07-4df8-aae4-724de9bc366c",
+		"name": "TP-Eventos-DAI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Event",
+			"item": [
+				{
+					"name": "getAllSync",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event/6",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEnrollmentById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event/6/enrollment?last_name=Szabo",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event",
+								"6",
+								"enrollment"
+							],
+							"query": [
+								{
+									"key": "rating",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "Szabo"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createAsync",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZmlyc3RfbmFtZSI6Ik1hcmNvIiwibGFzdF9uYW1lIjoiQW1icmljY2EiLCJ1c2VybmFtZSI6Im1hcmNvQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoibWFyYW1iMTA5IiwiaWF0IjoxNzIwNzkyMjEzLCJleHAiOjE3MjA3OTU4MTMsImlzcyI6Ik1BIn0.yeKC9rXpCeKiD6re_wWag4g1hf0G6GNDiNo6PtZMnls",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"ian en bolas\",\r\n    \"description\": \"mi amigo ian en bolas\",\r\n    \"id_event_category\": 3,\r\n    \"id_event_location\": 2,\r\n    \"start_date\": \"2024-10-10\",\r\n    \"duration_in_minutes\": 100,\r\n    \"price\": 1000,\r\n    \"enabled_for_enrollment\": 1,\r\n    \"max_assistance\": 10000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateAsync",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZmlyc3RfbmFtZSI6Ik1hcmNvIiwibGFzdF9uYW1lIjoiQW1icmljY2EiLCJ1c2VybmFtZSI6Im1hcmNvQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoibWFyYW1iMTA5IiwiaWF0IjoxNzIwNzkyMjEzLCJleHAiOjE3MjA3OTU4MTMsImlzcyI6Ik1BIn0.yeKC9rXpCeKiD6re_wWag4g1hf0G6GNDiNo6PtZMnls",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 64,\r\n    \"name\": \"ian en pelotas\",\r\n    \"description\": \"mi amigo ian en bolas\",\r\n    \"id_event_category\": 3,\r\n    \"id_event_location\": 2,\r\n    \"start_date\": \"2024-10-10\",\r\n    \"duration_in_minutes\": 100,\r\n    \"price\": 1000,\r\n    \"enabled_for_enrollment\": 1,\r\n    \"max_assistance\": 10000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAsync",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event/4",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event Category",
+			"item": [
+				{
+					"name": "getAllAsync",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event_category/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event_category",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createAsync",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Politica\",\r\n    \"display_order\": 50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event_category/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event_category",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateAsync",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 3,\r\n    \"name\": \"Arte\",\r\n    \"display_order\": 50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event_category/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event_category",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAsync",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event_category/1",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event_category",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event Locations",
+			"item": [
+				{
+					"name": "getAllAsync",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTA3LCJ1c2VybmFtZSI6Im1hdGlhc2l2YW5AZ21haWwuY29tIiwiaWF0IjoxNzIwNzk0MTIwLCJleHAiOjE3MjA3OTc3MjB9.ie0gdh3Dxd-Yy6lEaLhG86YSMYf3pqWHhdm0hlcFKZU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event_location/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event_location",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createAsync",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZmlyc3RfbmFtZSI6Ik1hcmNvIiwibGFzdF9uYW1lIjoiQW1icmljY2EiLCJ1c2VybmFtZSI6Im1hcmNvQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoibWFyYW1iMTA5IiwiaWF0IjoxNzIwNzkyMjEzLCJleHAiOjE3MjA3OTU4MTMsImlzcyI6Ik1BIn0.yeKC9rXpCeKiD6re_wWag4g1hf0G6GNDiNo6PtZMnls",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id_location\": 1,\r\n    \"name\": \"Estadio de Chacarita\",\r\n    \"full_address\": \"Federico Lacroze 1241\",\r\n    \"max_capacity\": 1000,\r\n    \"latitude\": -34.1251766141,\r\n    \"longitude\": -58.12381200085\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event_location/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event_location",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateAsync",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZmlyc3RfbmFtZSI6Ik1hcmNvIiwibGFzdF9uYW1lIjoiQW1icmljY2EiLCJ1c2VybmFtZSI6Im1hcmNvQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoibWFyYW1iMTA5IiwiaWF0IjoxNzIwNzkyMjEzLCJleHAiOjE3MjA3OTU4MTMsImlzcyI6Ik1BIn0.yeKC9rXpCeKiD6re_wWag4g1hf0G6GNDiNo6PtZMnls",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 10,\r\n    \"id_location\": 1,\r\n    \"name\": \"Estadio de Chaca\",\r\n    \"full_address\": \"Federico Lacroze 1241\",\r\n    \"max_capacity\": 1000,\r\n    \"latitude\": -34.1251766141,\r\n    \"longitude\": -58.12381200085\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event_location/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event_location",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAsync",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZmlyc3RfbmFtZSI6Ik1hcmNvIiwibGFzdF9uYW1lIjoiQW1icmljY2EiLCJ1c2VybmFtZSI6Im1hcmNvQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoibWFyYW1iMTA5IiwiaWF0IjoxNzIwNzkyMjEzLCJleHAiOjE3MjA3OTU4MTMsImlzcyI6Ik1BIn0.yeKC9rXpCeKiD6re_wWag4g1hf0G6GNDiNo6PtZMnls",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event_location/6",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event_location",
+								"6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Locations",
+			"item": [
+				{
+					"name": "getAllAsync",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/location/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"location",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEventLocationByIdSync",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/location/6/event-location",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"location",
+								"6",
+								"event-location"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Provinces",
+			"item": [
+				{
+					"name": "getAllAsync",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/province/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"province",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createAsync",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"a\",\r\n    \"full_name\": \"aa\",\r\n    \"latitude\": \"-1\",\r\n    \"longitude\": \"-2\",\r\n    \"display_order\": null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/province/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"province",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateAsync",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 2,\r\n    \"name\": \"C.A.B.A.\",\r\n    \"full_name\": \"Ciudad Autónoma de Buenos Aires\",\r\n    \"latitude\": \"-34.61444091796875\",\r\n    \"longitude\": \"-58.445877075195312\",\r\n    \"display_order\": null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/province/",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"province",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAsync",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/province/2",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"province",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();\r",
+									"pm.environment.set('token', res.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"matiasivan@gmail.com\",\r\n    \"password\": \"matsza207\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/user/login",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\": \"Guillermo\",\r\n    \"last_name\": \"Wonka\",\r\n    \"username\": \"Willy@chocolats.com\",\r\n    \"password\": \"ompaloompa\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/user/register",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event Enrollments",
+			"item": [
+				{
+					"name": "patchEnrollment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZmlyc3RfbmFtZSI6Ik1hcmNvIiwibGFzdF9uYW1lIjoiQW1icmljY2EiLCJ1c2VybmFtZSI6Im1hcmNvQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoibWFyYW1iMTA5IiwiaWF0IjoxNzIwNzkyMjEzLCJleHAiOjE3MjA3OTU4MTMsImlzcyI6Ik1BIn0.yeKC9rXpCeKiD6re_wWag4g1hf0G6GNDiNo6PtZMnls",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"observations\": \"cheto mal\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{scheme}}{{domain}}{{port}}/api/event/8/enrollment/9",
+							"host": [
+								"{{scheme}}{{domain}}{{port}}"
+							],
+							"path": [
+								"api",
+								"event",
+								"8",
+								"enrollment",
+								"9"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

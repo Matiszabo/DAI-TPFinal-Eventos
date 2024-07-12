@@ -1,11 +1,9 @@
-import pg from 'pg';
+const config = {
+    host: "localhost",
+    database: "DAI-Events",
+    user: "postgres",
+    password: "root",
+    port: 5432
+};
 
-const pool = new pg.Pool({
-    host: 'localhost',
-    database: 'TPfinal',
-    user: 'postgres',
-    password: 'root',
-    port: 5432, 
-});
-
-export default pool;
+export default config;

@@ -1,114 +1,83 @@
-import express from 'express';
-import {
-    getAllEventLocations,
-    getEventLocationById,
-    createEventLocation,
-    updateEventLocation,
-    deleteEventLocation
-} from '../services/event-location-service.js';
-import { authenticateToken } from '../middlewares/auth-middleware.js';
+import {Router} from 'express';
+import EventLocationService from './../services/event-location-service.js';
+import CommonService from './../services/common-service.js';
+import EventLocation from '../entities/event-location.js';
+import AuthenticationMiddleware from '../middlewares/AuthenticationMiddleware.js';
+const router = Router();
+const svc = new EventLocationService();
+const cmnSvc = new CommonService();
+const svcA = new AuthenticationMiddleware();
 
-const router = express.Router();
-
-// Obtener todas las ubicaciones de eventos del usuario autenticado
-router.get('/', authenticateToken, async (req, res) => {
-    const userId = req.user.id;
-    const limit = parseInt(req.query.limit, 10) || 10;
-    const offset = parseInt(req.query.offset, 10) || 0;
-
-    try {
-        const { eventLocations, total } = await getAllEventLocations(userId, limit, offset);
-        res.status(200).json({
-            collection: eventLocations,
-            pagination: {
-                limit,
-                offset,
-                total,
-                nextPage: offset + limit < total ? `/api/event-location?limit=${limit}&offset=${offset + limit}` : null
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Obtener una ubicación de evento por ID
-router.get('/:id', authenticateToken, async (req, res) => {
-    const userId = req.user.id;
-    const id = req.params.id;
-
-    try {
-        const eventLocation = await getEventLocationById(id, userId);
-        if (!eventLocation) {
-            return res.status(404).json({ message: 'Event location not found or not authorized.' });
-        }
-        res.status(200).json(eventLocation);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Crear una nueva ubicación de evento
-router.post('/', authenticateToken, async (req, res) => {
-    const userId = req.user.id;
-    const { name, full_address, id_location, max_capacity } = req.body;
-
-    if (!name || name.length < 3 || !full_address || full_address.length < 3) {
-        return res.status(400).json({ message: 'Name or full address is invalid.' });
-    }
-    if (max_capacity <= 0) {
-        return res.status(400).json({ message: 'Max capacity must be greater than zero.' });
-    }
-
-    try {
-        const newEventLocation = await createEventLocation({ name, full_address, id_location, max_capacity, id_creator_user: userId });
-        res.status(201).json(newEventLocation);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Actualizar una ubicación de evento
-router.put('/', authenticateToken, async (req, res) => {
+router.get('', svcA.AuthMiddleware, async (req, res) => {
     let respuesta;
-    const userId = req.user.id;
-    const { id, name, full_address, id_location, max_capacity } = req.body;
-
-    if (!name || name.length < 3 || !full_address || full_address.length < 3) {
-        return res.status(400).json({ message: 'Name or full address is invalid.' });
+    const returnArray = await cmnSvc.getAllSync('event_locations');
+    if (returnArray != null){
+        respuesta = res.status(200).json(returnArray);
     }
-    if (max_capacity <= 0) {
-        return res.status(400).json({ message: 'Max capacity must be greater than zero.' });
+    else {
+        respuesta = res.status(500).send('Error interno.');
     }
-
-    try {
-        const updatedEventLocation = await updateEventLocation({ id, name, full_address, id_location, max_capacity, id_creator_user: userId });
-        if (!updatedEventLocation) {
-            respuesta = res.status(404).json({ message: 'Event location not found or not authorized.' });
-        }else{
-            respuesta = res.status(201).json(updatedEventLocation);
-        }
-    } catch (error) {
-        respuesta =res.status(500).json({ message: error.message });
-    }
-
     return respuesta;
 });
 
-// Eliminar una ubicación de evento
-router.delete('/:id', authenticateToken, async (req, res) => {
-    const userId = req.user.id;
-    const id = req.params.id;
-
-    try {
-        const deletedEventLocation = await deleteEventLocation(id, userId);
-        if (!deletedEventLocation) {
-            return res.status(404).json({ message: 'Event location not found or not authorized.' });
-        }
-        res.status(200).json(deletedEventLocation);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+router.get('/:id', svcA.AuthMiddleware, async (req, res) => {
+    let respuesta;
+    const returnObject = await cmnSvc.getByIdSync('event_locations', req.params.id);
+    if (returnObject != null){
+        respuesta = res.status(200).json(returnObject)
     }
+    else {
+        respuesta = res.status(404).send("Id no encontrado.");
+    };
+    return respuesta;
+});
+
+router.post('', svcA.AuthMiddleware, async (req, res) => {
+    let response;
+    const eventLocation = new EventLocation(undefined, req.body.id_location, req.body.name, req.body.full_address, req.body.max_capacity, req.body.latitude, req.body.longitude, req.user.id);
+    response = await svc.createAsync(eventLocation);
+    if (typeof(response) === 'string'){
+        response = res.status(400).send(response);
+    }
+    else if (response == 1){
+        response = res.status(201).send('Se creó correctamente el objeto.');
+    }
+    else{
+        response = res.status(400).send('Ha ocurrido un error.');
+    }
+    return response;
+});
+
+router.put('', svcA.AuthMiddleware, async (req, res) => {
+    let response;
+    const eventLocation = new EventLocation(req.body.id, req.body.id_location, req.body.name, req.body.full_address, req.body.max_capacity, req.body.latitude, req.body.longitude, req.user.id);
+    console.log(eventLocation);
+    response = await svc.updateAsync(eventLocation);
+    if (typeof(response) === 'string'){
+        response = res.status(400).send(response);
+    }
+    else if (response == 1){
+        response = res.status(201).send('Se actualizo correctamente el objeto.');
+    }
+    else{
+        response = res.status(400).send('Ha ocurrido un error.');
+    }
+    return response;
+});
+
+router.delete('/:id', svcA.AuthMiddleware, async (req, res) => {
+    let response;
+    response = await cmnSvc.deleteByIdAsync('event_locations', req.params.id);
+    if (response == 1){
+        response = res.status(200).send("Objeto borrado.");
+    }
+    else if (response > 1){
+        response = res.status(400).send("Mas de un objeto borrado.");
+    }
+    else if (response < 1){
+        response = res.status(404).send("No se ha borrado el objeto.");
+    }
+    return response;
 });
 
 export default router;

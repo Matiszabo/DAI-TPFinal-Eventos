@@ -1,11 +1,18 @@
-class Province {
-    constructor(id, name, full_name, latitude, longitude, display_order) {
-        this.id = id;
-        this.name = name;
-        this.full_name = full_name;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.display_order = display_order;
+class Province{
+    id;
+    name;
+    full_name;
+    latitude;
+    longitude;
+    display_order;
+
+    constructor(n, full_n, lat, long, disp_order){
+        this.id = undefined;
+        this.name = n;
+        this.full_name = full_n;
+        this.latitude = lat;
+        this.longitude = long;
+        this.display_order = disp_order;
     }
 }
 

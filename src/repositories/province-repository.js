@@ -1,57 +1,99 @@
-import pool from "../configs/db-config.js";
+import DBConfig from './../configs/db-config.js';
+import pkg from 'pg';
+const { Client } = pkg;
 
-class ProvinceRepository {
-    async getAll() {
-        const client = await pool.connect();
+export default class ProvinceRepository{
+    getAllSync = async () => {
+        let returnArray = null;
+        const client = new Client(DBConfig);
         try {
-            const result = await client.query('SELECT * FROM public.provinces');
-            return result.rows;
-        } finally {
-            client.release();
+            await client.connect();
+            const sql = 'SELECT * FROM provinces';
+            const result = await client.query(sql);
+            await client.end();
+            returnArray = result.rows;
         }
+        catch (error){
+            console.log(error);
+        }
+        return returnArray;
     }
-
-    async getById(id) {
-        const client = await pool.connect();
+    
+    getByIdSync = async (id) => {
+        let returnObject = null;
+        const client = new Client(DBConfig);
         try {
-            const result = await client.query('SELECT * FROM public.provinces WHERE id = $1', [id]);
-            return result.rows[0];
-        } finally {
-            client.release();
+            await client.connect();
+            const sql = 'SELECT * from provinces WHERE id=$1';
+            const values = [id];
+            const result = await client.query(sql, values);
+            await client.end();
+            returnObject = result.rows[0];
         }
+        catch (error){
+            console.log(error);
+        }
+        return returnObject;
     }
-
-    async create(province) {
-        const { name, full_name, latitude, longitude, display_order } = province;
-        const client = await pool.connect();
+    createAsync = async (entity) => {
+        let rowsAffected = 0;
+        const client = new Client(DBConfig);
         try {
-            const result = await client.query('INSERT INTO public.provinces (name, full_name, latitude, longitude, display_order) VALUES ($1, $2, $3, $4, $5) RETURNING *', [name, full_name, latitude, longitude, display_order]);
-            return result.rows[0];
-        } finally {
-            client.release();
+            await client.connect();
+            const sql = `
+                INSERT INTO provinces
+                    (name, full_name, latitude, longitude, display_order)
+                VALUES
+                    ($1, $2, $3, $4, $5)
+            `;
+            const values = [entity.name, entity.full_name, entity.latitude, entity.longitude, entity.display_order];
+            const result = await client.query(sql, values);
+            await client.end();
+            rowsAffected = result.rowCount;
         }
+        catch (error){
+            console.log(error);
+        }
+        await client.end();
+        return rowsAffected;
     }
-
-    async update(province) {
-        const { id, name, full_name, latitude, longitude, display_order } = province;
-        const client = await pool.connect();
+    
+    updateAsync = async (entity) => {
+        let rowsAffected = 0;
+        const client = new Client(DBConfig);
         try {
-            const result = await client.query('UPDATE public.provinces SET name = $1, full_name = $2, latitude = $3, longitude = $4, display_order = $5 WHERE id = $6', [name, full_name, latitude, longitude, display_order, id]);
-            return result;
-        } finally {
-            client.release();
+            await client.connect();
+            const sql = `
+                UPDATE provinces
+                SET name = $1, full_name = $2, latitude = $3, longitude = $4, display_order = $5
+                WHERE id = $6
+            `;
+            const values = [entity.name, entity.full_name, entity.latitude, entity.longitude, entity.display_order, entity.id];
+            const result = await client.query(sql, values);
+            await client.end();
+            rowsAffected = result.rowCount;
         }
+        catch (error){
+            console.log(error);
+        }
+        await client.end();
+        return rowsAffected;
     }
-
-    async delete(id) {
-        const client = await pool.connect();
+    deleteByIdAsync = async (id) => {
+        let rowsAffected = 0;
+        const client = new Client(DBConfig);
         try {
-            const result = await client.query('DELETE FROM public.provinces WHERE id = $1', [id]);
-            return result;
-        } finally {
-            client.release();
+            await client.connect();
+            const sql = 'DELETE FROM provinces WHERE id = $1';
+            const values = [id];
+            const result = await client.query(sql, values);
+            await client.end();
+
+            rowsAffected = result.rowCount;
         }
+        catch (error){
+            console.log(error);
+        }
+        return rowsAffected;
     }
 }
-
-export default ProvinceRepository;
